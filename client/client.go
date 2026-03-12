@@ -32,4 +32,9 @@ _)      \.___.,|     .'
 
 func sendWelcome(conection net.Conn) {
 	fmt.Fprint(conection, "Welcome to TCP-Chat!\n", Logo, "\n[ENTER YOUR NAME]:")
+
+}
+
+func HandleConnection(conection net.Conn) {
+	sendWelcome(conection)
 }
