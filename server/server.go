@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"os"
+	"net"
+	"net-cat/client"
 )
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -56,5 +58,33 @@ func ValidatePort(port string) bool {
 		return true
 	} else {
 		return false
+	}
+}
+
+// StartServer starts a TCP server that listens on the specified port.
+// Prints the message "Listening on the port :$port" to stdout when the server starts successfully.
+// It returns an error if there is an issue starting the server.
+func StartServer(port string) (net.Listener, error) {
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return nil, fmt.Errorf("error starting server: %v", err)
+	}
+	addr := listener.Addr().(*net.TCPAddr)
+	portNum := addr.Port
+	fmt.Printf("Listening on the port :%d\n", portNum)
+
+	return listener, nil
+}
+
+// AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
+func AcceptConnections(listener net.Listener) error {
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			return fmt.Errorf("error accepting connection: %v", err)
+		}
+		defer conn.Close()
+		// Handle Connection
+		go client.HandleConnection(conn)
 	}
 }
