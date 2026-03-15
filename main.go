@@ -13,5 +13,20 @@ func main() {
 		server.PrintUsageMessage()
 		os.Exit(1)
 	}
-	fmt.Printf("Listening on the port :%s\n", port)
+
+	// Start server on port
+	listener, err := server.StartServer(port)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
+		os.Exit(1)
+	}
+	defer listener.Close()
+
+	// Accept incoming connections
+	err = server.AcceptConnections(listener)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error accepting connections: %v\n", err)
+		os.Exit(1)
+	}
+
 }
