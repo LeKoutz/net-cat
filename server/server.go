@@ -83,7 +83,6 @@ func AcceptConnections(listener net.Listener) error {
 		if err != nil {
 			return fmt.Errorf("error accepting connection: %v", err)
 		}
-		defer conn.Close()
 		// Handle Connection
 		go client.HandleConnection(conn)
 	}
