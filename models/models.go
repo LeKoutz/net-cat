@@ -6,8 +6,8 @@ import (
 )
 
 type Server struct {
-	clients []Client
-	mutex	 sync.Mutex
+	clients map[string]*Client
+	mutex	sync.Mutex
 }
 
 type Client struct {
