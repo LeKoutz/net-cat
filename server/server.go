@@ -5,7 +5,13 @@ import (
 	"os"
 	"net"
 	"net-cat/client"
+	"sync"
 )
+
+type Server struct {
+	clients map[string]*client.Client
+	mutex	sync.Mutex
+}
 
 // ParseArgs parses command line arguments and returns the port as a string.
 // If no arguments are provided, it returns the default port "8989".
