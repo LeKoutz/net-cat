@@ -6,12 +6,6 @@ import (
 	"net"
 )
 
-// Client struct stores connection and Username
-type Client struct {
-	Conn net.Conn // η "γραμμή" σύνδεσης TCP
-	Name string   // το όνομά του
-}
-
 const Logo = `
          _nnnn_
         dGGGGMMb
