@@ -6,11 +6,13 @@ import (
 )
 
 type Server struct {
-	clients map[string]*Client
-	mutex	sync.Mutex
+	Listener 	net.Listener
+	Clients 	map[string]*Client
+	MaxClients	int
+	Mutex		sync.Mutex
 }
 
 type Client struct {
-	conn net.Conn
-	name string
+	Conn net.Conn
+	Name string
 }
