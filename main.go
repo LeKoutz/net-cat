@@ -15,15 +15,15 @@ func main() {
 	}
 
 	// Start server on port
-	listener, err := server.StartServer(port)
+	chatServer, err := server.StartServer(port)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
 		os.Exit(1)
 	}
-	defer listener.Close()
+	defer chatServer.Listener.Close()
 
 	// Accept incoming connections
-	err = server.AcceptConnections(listener)
+	err = server.AcceptConnections(chatServer)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error accepting connections: %v\n", err)
 		os.Exit(1)
