@@ -77,12 +77,21 @@ func StartServer(port string) (net.Listener, error) {
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
-func AcceptConnections(listener net.Listener) error {
+func (s *Server) AcceptConnections() error {
 	for {
-		conn, err := listener.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
 			return fmt.Errorf("error accepting connection: %v", err)
 		}
+		// Check if the number of clients has reached the maximum limit
+			s.mutex.Lock()
+		if len(s.clients) >= s.maxClients {
+			s.mutex.Unlock()
+			conn.Close()
+			fmt.Println("Maximum number of clients reached. Cannot accept more connections.")
+			continue
+		}
+		s.mutex.Unlock()
 		// Handle Connection
 		go client.HandleConnection(conn)
 	}
