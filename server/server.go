@@ -5,6 +5,7 @@ import (
 	"os"
 	"net"
 	"net-cat/client"
+	"net-cat/models"
 )
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -86,4 +87,18 @@ func AcceptConnections(listener net.Listener) error {
 		// Handle Connection
 		go client.HandleConnection(conn)
 	}
+}
+
+// AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
+func AddClient(s *models.Server, cl *models.Client) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	if cl.Name == "" {
+		return fmt.Errorf("Client name cannot be empty")
+	}
+	if _, exists := s.Clients[cl.Name]; exists {
+		return fmt.Errorf("Client name \"%s\" already exists", cl.Name)
+	}
+	s.Clients[cl.Name] = cl
+	return nil
 }
