@@ -65,7 +65,7 @@ func ValidatePort(port string) bool {
 // StartServer starts a TCP server that listens on the specified port.
 // Prints the message "Listening on the port :$port" to stdout when the server starts successfully.
 // It returns an error if there is an issue starting the server.
-func StartServer(port string) (net.Listener, error) {
+func StartServer(port string) (*models.Server, error) {
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return nil, fmt.Errorf("error starting server: %v", err)
@@ -74,7 +74,14 @@ func StartServer(port string) (net.Listener, error) {
 	portNum := addr.Port
 	fmt.Printf("Listening on the port :%d\n", portNum)
 
-	return listener, nil
+	server := &models.Server{
+		Listener:   listener,
+		Clients:    make(map[string]*models.Client),
+		MaxClients: 10,
+		Mutex:      sync.Mutex{},
+	}
+
+	return server, nil
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
