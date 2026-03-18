@@ -6,6 +6,7 @@ import (
 	"net"
 	"net-cat/client"
 	"net-cat/models"
+	"sync"
 )
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -85,12 +86,22 @@ func StartServer(port string) (*models.Server, error) {
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
-func AcceptConnections(listener net.Listener) error {
+func AcceptConnections(server *models.Server) error {
 	for {
-		conn, err := listener.Accept()
+		conn, err := server.Listener.Accept()
 		if err != nil {
 			return fmt.Errorf("error accepting connection: %v", err)
 		}
+		// Check if the number of clients has reached the maximum limit
+		server.Mutex.Lock()
+		if len(server.Clients) >= server.MaxClients {
+			server.Mutex.Unlock()
+			conn.Close()
+			fmt.Println("Maximum number of clients reached. Cannot accept more connections.")
+			continue
+		}
+		server.Mutex.Unlock()
+
 		// Handle Connection
 		go client.HandleConnection(conn)
 	}
