@@ -6,6 +6,7 @@ import (
 	"net"
 	"net-cat/client"
 	"net-cat/models"
+	"sync"
 )
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -65,7 +66,7 @@ func ValidatePort(port string) bool {
 // StartServer starts a TCP server that listens on the specified port.
 // Prints the message "Listening on the port :$port" to stdout when the server starts successfully.
 // It returns an error if there is an issue starting the server.
-func StartServer(port string) (net.Listener, error) {
+func StartServer(port string) (*models.Server, error) {
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return nil, fmt.Errorf("error starting server: %v", err)
@@ -74,16 +75,33 @@ func StartServer(port string) (net.Listener, error) {
 	portNum := addr.Port
 	fmt.Printf("Listening on the port :%d\n", portNum)
 
-	return listener, nil
+	server := &models.Server{
+		Listener:   listener,
+		Clients:    make(map[string]*models.Client),
+		MaxClients: 10,
+		Mutex:      sync.Mutex{},
+	}
+
+	return server, nil
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
-func AcceptConnections(listener net.Listener) error {
+func AcceptConnections(server *models.Server) error {
 	for {
-		conn, err := listener.Accept()
+		conn, err := server.Listener.Accept()
 		if err != nil {
 			return fmt.Errorf("error accepting connection: %v", err)
 		}
+		// Check if the number of clients has reached the maximum limit
+		server.Mutex.Lock()
+		if len(server.Clients) >= server.MaxClients {
+			server.Mutex.Unlock()
+			conn.Close()
+			fmt.Println("Maximum number of clients reached. Cannot accept more connections.")
+			continue
+		}
+		server.Mutex.Unlock()
+
 		// Handle Connection
 		go client.HandleConnection(conn)
 	}
