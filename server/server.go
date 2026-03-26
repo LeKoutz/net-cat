@@ -100,9 +100,9 @@ func (server *Server) AcceptConnections() error {
 		// Check if the number of clients has reached the maximum limit
 		server.Mutex.Lock()
 		if len(server.Clients) >= server.MaxClients {
+			fmt.Fprintln(conn, "Maximum number of clients reached. Cannot accept more connections.")
 			server.Mutex.Unlock()
 			conn.Close()
-			fmt.Println("Maximum number of clients reached. Cannot accept more connections.")
 			continue
 		}
 		server.Mutex.Unlock()
