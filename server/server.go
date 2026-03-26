@@ -91,7 +91,7 @@ func StartServer(port string) (*Server, error) {
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
-func AcceptConnections(server *Server) error {
+func (server *Server) AcceptConnections() error {
 	for {
 		conn, err := server.Listener.Accept()
 		if err != nil {
@@ -113,15 +113,15 @@ func AcceptConnections(server *Server) error {
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
-func AddClient(s *Server, cl *Client) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+func (server *Server) AddClient(cl *Client) error {
+	server.Mutex.Lock()
+	defer server.Mutex.Unlock()
 	if cl.Name == "" {
 		return fmt.Errorf("Client name cannot be empty")
 	}
-	if _, exists := s.Clients[cl.Name]; exists {
+	if _, exists := server.Clients[cl.Name]; exists {
 		return fmt.Errorf("Client name \"%s\" already exists", cl.Name)
 	}
-	s.Clients[cl.Name] = cl
+	server.Clients[cl.Name] = cl
 	return nil
 }

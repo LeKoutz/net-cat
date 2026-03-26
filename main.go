@@ -23,7 +23,7 @@ func main() {
 	defer chatServer.Listener.Close()
 
 	// Accept incoming connections
-	err = server.AcceptConnections(chatServer)
+	err = chatServer.AcceptConnections()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error accepting connections: %v\n", err)
 		os.Exit(1)

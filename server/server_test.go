@@ -53,7 +53,7 @@ func TestAddClient(t *testing.T) {
 			t.Logf("Clients map before: %v", testServer.Clients)
 
 			cl := &Client{Name: tt.clientName}
-			err := AddClient(testServer, cl)
+			err := testServer.AddClient(cl)
 
 			// Print clients map for debugging
 			t.Logf("Clients map after: %+v", testServer.Clients)
