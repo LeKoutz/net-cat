@@ -1,10 +1,15 @@
-package client
+package server
 
 import (
 	"bufio"
 	"fmt"
 	"net"
 )
+
+type Client struct {
+	Conn net.Conn
+	Name string
+}
 
 const Logo = `
          _nnnn_

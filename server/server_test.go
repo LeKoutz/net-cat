@@ -2,12 +2,11 @@ package server
 
 import (
 	"testing"
-	"net-cat/models"
 )
 
-func newTestServer() *models.Server {
-	return &models.Server{
-		Clients: make(map[string]*models.Client),
+func newTestServer() *Server {
+	return &Server{
+		Clients: make(map[string]*Client),
 	}
 }
 
@@ -15,28 +14,28 @@ func TestAddClient(t *testing.T) {
 	tests := []struct {
 		name        string
 		clientName  string
-		setup       func(s *models.Server)
+		setup       func(s *Server)
 		expectError bool
 		errorMessage string
 	}{
 		{
 			name:       "Valid client",
 			clientName: "User",
-			setup:      func(s *models.Server) {},
+			setup:      func(s *Server) {},
 			expectError: false,
 		},
 		{
 			name:       "Empty name",
 			clientName: "",
-			setup:      func(s *models.Server) {},
+			setup:      func(s *Server) {},
 			expectError: true,
 			errorMessage: "client name cannot be empty",
 		},
 		{
 			name:       "Duplicate client",
 			clientName: "User",
-			setup: func(s *models.Server) {
-				s.Clients["User"] = &models.Client{Name: "User"}
+			setup: func(s *Server) {
+				s.Clients["User"] = &Client{Name: "User"}
 			},
 			expectError: true,
 			errorMessage: "client name %s already exists",
@@ -53,7 +52,7 @@ func TestAddClient(t *testing.T) {
 			// Print clients map before adding client for debugging
 			t.Logf("Clients map before: %v", testServer.Clients)
 
-			cl := &models.Client{Name: tt.clientName}
+			cl := &Client{Name: tt.clientName}
 			err := AddClient(testServer, cl)
 
 			// Print clients map for debugging

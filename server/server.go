@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"os"
 	"net"
-	"net-cat/client"
-	"net-cat/models"
 	"sync"
 )
+
+type Server struct {
+	Listener 	net.Listener
+	Clients 	map[string]*Client
+	MaxClients	int
+	Mutex		sync.Mutex
+}
 
 // ParseArgs parses command line arguments and returns the port as a string.
 // If no arguments are provided, it returns the default port "8989".
@@ -66,7 +71,7 @@ func ValidatePort(port string) bool {
 // StartServer starts a TCP server that listens on the specified port.
 // Prints the message "Listening on the port :$port" to stdout when the server starts successfully.
 // It returns an error if there is an issue starting the server.
-func StartServer(port string) (*models.Server, error) {
+func StartServer(port string) (*Server, error) {
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return nil, fmt.Errorf("error starting server: %v", err)
@@ -75,9 +80,9 @@ func StartServer(port string) (*models.Server, error) {
 	portNum := addr.Port
 	fmt.Printf("Listening on the port :%d\n", portNum)
 
-	server := &models.Server{
+	server := &Server{
 		Listener:   listener,
-		Clients:    make(map[string]*models.Client),
+		Clients:    make(map[string]*Client),
 		MaxClients: 10,
 		Mutex:      sync.Mutex{},
 	}
@@ -86,7 +91,7 @@ func StartServer(port string) (*models.Server, error) {
 }
 
 // AcceptConnections accepts incoming connections in an infinite loop. It returns an error if there is an issue accepting connections.
-func AcceptConnections(server *models.Server) error {
+func AcceptConnections(server *Server) error {
 	for {
 		conn, err := server.Listener.Accept()
 		if err != nil {
@@ -103,12 +108,12 @@ func AcceptConnections(server *models.Server) error {
 		server.Mutex.Unlock()
 
 		// Handle Connection
-		go client.HandleConnection(conn)
+		go HandleConnection(conn)
 	}
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
-func AddClient(s *models.Server, cl *models.Client) error {
+func AddClient(s *Server, cl *Client) error {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	if cl.Name == "" {
