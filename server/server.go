@@ -108,7 +108,19 @@ func (server *Server) AcceptConnections() error {
 		server.Mutex.Unlock()
 
 		// Handle Connection
-		go HandleConnection(conn)
+		go server.HandleConnection(conn)
+	}
+}
+
+func (server *Server) HandleConnection(conn net.Conn) {
+	defer conn.Close()
+	sendWelcome(conn)
+	client := &Client{Name: GetName(conn), Conn: conn}
+	err := server.AddClient(client)
+	if err != nil {
+		fmt.Fprintf(conn, "%v\n", err)
+	} else {
+		fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
 	}
 }
 

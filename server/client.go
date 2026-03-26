@@ -37,12 +37,6 @@ func sendWelcome(conn net.Conn) {
 
 }
 
-func HandleConnection(conn net.Conn) {
-	defer conn.Close()
-	sendWelcome(conn)
-	GetName(conn)
-}
-
 // Get users name
 func GetName(conn net.Conn) string {
 	scanner := bufio.NewScanner(conn)
