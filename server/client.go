@@ -1,10 +1,15 @@
-package client
+package server
 
 import (
 	"bufio"
 	"fmt"
 	"net"
 )
+
+type Client struct {
+	Conn net.Conn
+	Name string
+}
 
 const Logo = `
          _nnnn_
@@ -30,12 +35,6 @@ _)      \.___.,|     .'
 func sendWelcome(conn net.Conn) {
 	fmt.Fprint(conn, "Welcome to TCP-Chat!\n", Logo, "\n[ENTER YOUR NAME]:")
 
-}
-
-func HandleConnection(conn net.Conn) {
-	defer conn.Close()
-	sendWelcome(conn)
-	GetName(conn)
 }
 
 // Get users name
