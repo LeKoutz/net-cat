@@ -154,14 +154,20 @@ func (server *Server) AddClient(cl *Client) error {
 	return nil
 }
 
+// StartBroadcastingService listens for messages on the broadcast channel
+// and sends them to all connected clients except the sender.
 func (server *Server) StartBroadcastingService() {
 	for msg := range server.broadcastCh {
 		server.Mutex.Lock()
+		clients := make(map[string]*Client)
 		for _, client := range server.Clients {
 			if client.Name != msg.Sender.Name {
-				fmt.Fprintln(client.Conn, msg.Format())
+				clients[client.Name] = client
 			}
 		}
 		server.Mutex.Unlock()
+		for _, client := range clients {
+				fmt.Fprintln(client.Conn, msg.Format())
+		}
 	}
 }
