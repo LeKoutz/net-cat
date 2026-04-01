@@ -2,16 +2,16 @@ package server
 
 import (
 	"fmt"
-	"os"
 	"net"
+	"os"
 	"sync"
 )
 
 type Server struct {
-	Listener 	net.Listener
-	Clients 	map[string]*Client
-	MaxClients	int
-	Mutex		sync.Mutex
+	Listener   net.Listener
+	Clients    map[string]*Client
+	MaxClients int
+	Mutex      sync.Mutex
 }
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -27,7 +27,7 @@ func ParseArgs(args []string) (string, error) {
 	}
 	port := args[0]
 	portIsValid := ValidatePort(port)
-	if len(args) == 1 && portIsValid{
+	if len(args) == 1 && portIsValid {
 		return port, nil
 	} else {
 		return "", fmt.Errorf("invalid port number")
@@ -116,11 +116,15 @@ func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
 	client := &Client{Name: GetName(conn), Conn: conn}
-	err := server.AddClient(client)
-	if err != nil {
-		fmt.Fprintf(conn, "%v\n", err)
-	} else {
-		fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
+	for {
+		err := server.AddClient(client)
+		if err == nil {
+			fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
+			break
+		} else {
+			fmt.Fprintf(conn, "%v\n", err)
+			client = &Client{Name: GetName(conn), Conn: conn}
+		}
 	}
 }
 
