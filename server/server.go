@@ -88,6 +88,7 @@ func StartServer(port string) (*Server, error) {
 		Clients:    make(map[string]*Client),
 		MaxClients: 10,
 		Mutex:      sync.Mutex{},
+		broadcastCh: make(chan Message, 15),
 	}
 
 	return server, nil
