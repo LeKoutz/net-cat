@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"time"
 )
 
 type Client struct {
@@ -49,4 +50,11 @@ func GetName(conn net.Conn) string {
 		return name
 	}
 	return ""
+}
+
+// Timestamp formation
+func (c *Client) FormatMessage(message string) string {
+	t := time.Now()
+	formattedt := t.Format("2006-01-02 15:04:05")
+	return "[" + formattedt + "][" + c.Name + "]:" + message
 }
