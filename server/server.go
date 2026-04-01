@@ -5,6 +5,8 @@ import (
 	"net"
 	"os"
 	"sync"
+	"bufio"
+	"time"
 )
 
 type Server struct {
@@ -125,6 +127,15 @@ func (server *Server) HandleConnection(conn net.Conn) {
 			fmt.Fprintf(conn, "%v\n", err)
 			client = &Client{Name: GetName(conn), Conn: conn}
 		}
+	}
+	// Listen for client input and send message to the server's broadcast channel
+	scanner := bufio.NewScanner(conn)
+	for scanner.Scan() {
+		msg := scanner.Text()
+		if msg == "" {
+			continue
+		}
+		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
 }
 
