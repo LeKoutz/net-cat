@@ -10,10 +10,11 @@ import (
 )
 
 type Server struct {
-	Listener   net.Listener
-	Clients    map[string]*Client
-	MaxClients int
-	Mutex      sync.Mutex
+	Listener    net.Listener
+	Clients     map[string]*Client
+	MaxClients  int
+	Mutex       sync.Mutex
+	broadcastCh chan Message
 }
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -151,4 +152,16 @@ func (server *Server) AddClient(cl *Client) error {
 	}
 	server.Clients[cl.Name] = cl
 	return nil
+}
+
+func (server *Server) StartBroadcastingService() {
+	for msg := range server.broadcastCh {
+		server.Mutex.Lock()
+		for _, client := range server.Clients {
+			if client.Name != msg.Sender.Name {
+				fmt.Fprintln(client.Conn, msg.Format())
+			}
+		}
+		server.Mutex.Unlock()
+	}
 }
