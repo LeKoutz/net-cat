@@ -15,6 +15,7 @@ type Client struct {
 type Message struct {
 	Sender  *Client
 	Content string
+	Time    time.Time
 }
 
 const Logo = `
@@ -59,7 +60,6 @@ func GetName(conn net.Conn) string {
 
 // Timestamp formation
 func (m *Message) Format() string {
-	t := time.Now()
-	formattedt := t.Format("2006-01-02 15:04:05")
+	formattedt := m.Time.Format("2006-01-02 15:04:05")
 	return "[" + formattedt + "][" + m.Sender.Name + "]:" + m.Content
 }
