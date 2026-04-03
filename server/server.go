@@ -122,13 +122,17 @@ func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
 	client := &Client{Name: GetName(conn), Conn: conn}
+	var mesg Message
 	for {
 		err := server.AddClient(client)
 		if err == nil {
 			for _, msg := range server.History {
 				fmt.Fprintln(conn, msg.Format())
 			}
-			fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
+			mesg.Sender = client
+			mesg.System = true
+			mesg.Content = fmt.Sprintf("%v has joined the chat...\n", client.Name)
+			server.broadcastCh <- mesg
 			break
 		} else {
 			fmt.Fprintf(conn, "%v\n", err)
