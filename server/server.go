@@ -129,6 +129,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 			for _, msg := range server.History {
 				fmt.Fprintln(conn, msg.Format())
 			}
+			defer server.RemoveClient(client)
 			mesg.Sender = client
 			mesg.System = true
 			mesg.Content = fmt.Sprintf("%v has joined the chat...\n", client.Name)
@@ -148,7 +149,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
-	defer server.RemoveClient(client)
+
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
