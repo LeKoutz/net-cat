@@ -4,11 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"time"
 )
 
 type Client struct {
 	Conn net.Conn
 	Name string
+}
+
+type Message struct {
+	Sender  *Client
+	Content string
+	Time    time.Time
 }
 
 const Logo = `
@@ -49,4 +56,10 @@ func GetName(conn net.Conn) string {
 		return name
 	}
 	return ""
+}
+
+// Timestamp formation
+func (m *Message) Format() string {
+	formattedt := m.Time.Format("2006-01-02 15:04:05")
+	return "[" + formattedt + "][" + m.Sender.Name + "]:" + m.Content
 }
