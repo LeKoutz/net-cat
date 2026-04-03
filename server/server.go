@@ -118,6 +118,7 @@ func (server *Server) AcceptConnections() error {
 	}
 }
 
+// Adds-remove clients, sends the messages.
 func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
