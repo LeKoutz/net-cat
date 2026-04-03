@@ -122,7 +122,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
 	client := &Client{Name: GetName(conn), Conn: conn}
-	var mesg Message
+	mesg := Message{Sender: client, System: true}
 	for {
 		err := server.AddClient(client)
 		if err == nil {
@@ -130,9 +130,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 				fmt.Fprintln(conn, msg.Format())
 			}
 			defer server.RemoveClient(client)
-			mesg.Sender = client
-			mesg.System = true
-			mesg.Content = fmt.Sprintf("%v has joined the chat...\n", client.Name)
+			mesg.Content = fmt.Sprintf("%v has joined our chat...\n", client.Name)
 			server.broadcastCh <- mesg
 			break
 		} else {
@@ -149,6 +147,8 @@ func (server *Server) HandleConnection(conn net.Conn) {
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
+	mesg.Content = fmt.Sprintf("%v has left our chat...\n", client.Name)
+	server.broadcastCh <- mesg
 
 }
 
