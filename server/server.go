@@ -1,11 +1,11 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
 	"sync"
-	"bufio"
 	"time"
 )
 
@@ -84,10 +84,10 @@ func StartServer(port string) (*Server, error) {
 	fmt.Printf("Listening on the port :%d\n", portNum)
 
 	server := &Server{
-		Listener:   listener,
-		Clients:    make(map[string]*Client),
-		MaxClients: 10,
-		Mutex:      sync.Mutex{},
+		Listener:    listener,
+		Clients:     make(map[string]*Client),
+		MaxClients:  10,
+		Mutex:       sync.Mutex{},
 		broadcastCh: make(chan Message, 15),
 	}
 
@@ -139,6 +139,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
+	defer server.RemoveClient(client)
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
@@ -168,7 +169,14 @@ func (server *Server) StartBroadcastingService() {
 		}
 		server.Mutex.Unlock()
 		for _, client := range clients {
-				fmt.Fprintln(client.Conn, msg.Format())
+			fmt.Fprintln(client.Conn, msg.Format())
 		}
 	}
+}
+
+func (server *Server) RemoveClient(cl *Client) error {
+	server.Mutex.Lock()
+	defer server.Mutex.Unlock()
+	delete(server.Clients, cl.Name)
+	return nil
 }
