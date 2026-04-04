@@ -15,6 +15,7 @@ type Server struct {
 	MaxClients  int
 	Mutex       sync.Mutex
 	broadcastCh chan Message
+	History     []Message
 }
 
 // ParseArgs parses command line arguments and returns the port as a string.
@@ -89,6 +90,7 @@ func StartServer(port string) (*Server, error) {
 		MaxClients:  10,
 		Mutex:       sync.Mutex{},
 		broadcastCh: make(chan Message, 15),
+		History:     []Message{},
 	}
 
 	return server, nil
@@ -158,8 +160,12 @@ func (server *Server) AddClient(cl *Client) error {
 
 // StartBroadcastingService listens for messages on the broadcast channel
 // and sends them to all connected clients except the sender.
+// It also keeps track of the message history.
 func (server *Server) StartBroadcastingService() {
 	for msg := range server.broadcastCh {
+		if !msg.System {
+			server.SaveMessageToHistory(msg)
+		}
 		server.Mutex.Lock()
 		clients := make(map[string]*Client)
 		for _, client := range server.Clients {
@@ -177,4 +183,10 @@ func (server *Server) RemoveClient(cl *Client) error {
 	defer server.Mutex.Unlock()
 	delete(server.Clients, cl.Name)
 	return nil
+}
+
+func (server *Server) SaveMessageToHistory(msg Message) {
+	server.Mutex.Lock()
+	defer server.Mutex.Unlock()
+	server.History = append(server.History, msg)
 }
