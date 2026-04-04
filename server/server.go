@@ -163,7 +163,9 @@ func (server *Server) AddClient(cl *Client) error {
 // It also keeps track of the message history.
 func (server *Server) StartBroadcastingService() {
 	for msg := range server.broadcastCh {
-		server.SaveMessageToHistory(msg)
+		if !msg.System {
+			server.SaveMessageToHistory(msg)
+		}
 		server.Mutex.Lock()
 		clients := make(map[string]*Client)
 		for _, client := range server.Clients {
