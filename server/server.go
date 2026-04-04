@@ -148,6 +148,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 			continue
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
+		fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
 
 	}
 	mesg.Content = fmt.Sprintf("\n%v has left our chat...", client.Name)
