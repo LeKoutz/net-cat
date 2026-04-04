@@ -180,7 +180,9 @@ func (server *Server) StartBroadcastingService() {
 		server.Mutex.Lock()
 		clients := make(map[string]*Client)
 		for _, client := range server.Clients {
-			clients[client.Name] = client
+			if client.Name != msg.Sender.Name {
+				clients[client.Name] = client
+			}
 		}
 		server.Mutex.Unlock()
 		for _, client := range clients {
