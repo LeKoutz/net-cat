@@ -125,6 +125,9 @@ func (server *Server) HandleConnection(conn net.Conn) {
 	for {
 		err := server.AddClient(client)
 		if err == nil {
+			for _, msg := range server.History {
+				fmt.Fprintln(conn, msg.Format())
+			}
 			fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
 			break
 		} else {
