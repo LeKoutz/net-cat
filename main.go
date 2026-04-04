@@ -22,6 +22,8 @@ func main() {
 	}
 	defer chatServer.Listener.Close()
 
+	go chatServer.StartBroadcastingService()
+
 	// Accept incoming connections
 	err = chatServer.AcceptConnections()
 	if err != nil {

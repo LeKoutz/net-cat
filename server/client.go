@@ -16,6 +16,7 @@ type Message struct {
 	Sender  *Client
 	Content string
 	Time    time.Time
+	System  bool
 }
 
 const Logo = `
@@ -61,5 +62,9 @@ func GetName(conn net.Conn) string {
 // Timestamp formation
 func (m *Message) Format() string {
 	formattedt := m.Time.Format("2006-01-02 15:04:05")
-	return "[" + formattedt + "][" + m.Sender.Name + "]:" + m.Content
+	if m.System {
+		return m.Content
+	} else {
+		return "[" + formattedt + "][" + m.Sender.Name + "]:" + m.Content
+	}
 }

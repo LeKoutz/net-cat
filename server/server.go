@@ -118,17 +118,21 @@ func (server *Server) AcceptConnections() error {
 	}
 }
 
+// Adds-remove clients, sends the messages.
 func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
 	client := &Client{Name: GetName(conn), Conn: conn}
+	mesg := Message{Sender: client, System: true}
 	for {
 		err := server.AddClient(client)
 		if err == nil {
 			for _, msg := range server.History {
 				fmt.Fprintln(conn, msg.Format())
 			}
-			fmt.Fprintf(conn, "%v has joined the chat...\n", client.Name)
+			defer server.RemoveClient(client)
+			mesg.Content = fmt.Sprintf("%v has joined our chat...\n", client.Name)
+			server.broadcastCh <- mesg
 			break
 		} else {
 			fmt.Fprintf(conn, "%v\n", err)
@@ -144,7 +148,9 @@ func (server *Server) HandleConnection(conn net.Conn) {
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
-	defer server.RemoveClient(client)
+	mesg.Content = fmt.Sprintf("%v has left our chat...\n", client.Name)
+	server.broadcastCh <- mesg
+
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
