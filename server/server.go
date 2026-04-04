@@ -187,7 +187,7 @@ func (server *Server) StartBroadcastingService() {
 		}
 		server.Mutex.Unlock()
 		for _, client := range clients {
-			fmt.Fprintln(client.Conn, msg.Format())
+			fmt.Fprintln(client.Conn, "\n"+msg.Format())
 			fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
 
 		}
