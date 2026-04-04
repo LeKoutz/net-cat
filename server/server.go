@@ -131,7 +131,8 @@ func (server *Server) HandleConnection(conn net.Conn) {
 				fmt.Fprintln(conn, msg.Format())
 			}
 			defer server.RemoveClient(client)
-			mesg.Content = fmt.Sprintf("%v has joined our chat...", client.Name)
+			mesg.Content = fmt.Sprintf("\n%v has joined our chat...", client.Name)
+			fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
 			server.broadcastCh <- mesg
 			break
 		} else {
@@ -147,8 +148,9 @@ func (server *Server) HandleConnection(conn net.Conn) {
 			continue
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
+
 	}
-	mesg.Content = fmt.Sprintf("%v has left our chat...", client.Name)
+	mesg.Content = fmt.Sprintf("\n%v has left our chat...", client.Name)
 	server.broadcastCh <- mesg
 
 }
@@ -183,6 +185,8 @@ func (server *Server) StartBroadcastingService() {
 		server.Mutex.Unlock()
 		for _, client := range clients {
 			fmt.Fprintln(client.Conn, msg.Format())
+			fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
+
 		}
 	}
 }
