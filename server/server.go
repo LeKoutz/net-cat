@@ -131,7 +131,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 				fmt.Fprintln(conn, msg.Format())
 			}
 			defer server.RemoveClient(client)
-			mesg.Content = fmt.Sprintf("%v has joined our chat...\n", client.Name)
+			mesg.Content = fmt.Sprintf("%v has joined our chat...", client.Name)
 			server.broadcastCh <- mesg
 			break
 		} else {
@@ -148,7 +148,7 @@ func (server *Server) HandleConnection(conn net.Conn) {
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
 	}
-	mesg.Content = fmt.Sprintf("%v has left our chat...\n", client.Name)
+	mesg.Content = fmt.Sprintf("%v has left our chat...", client.Name)
 	server.broadcastCh <- mesg
 
 }
