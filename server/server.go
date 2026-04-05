@@ -146,17 +146,16 @@ func (server *Server) HandleConnection(conn net.Conn) {
 	// Listen for client input and send message to the server's broadcast channel
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
+		fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
 		msg := scanner.Text()
 		if msg == "" {
 			continue
 		}
 		server.broadcastCh <- Message{Sender: client, Content: msg, Time: time.Now()}
-		fmt.Fprintf(client.Conn, "[%v][%v]:", time.Now().Format("2006-01-02 15:04:05"), client.Name)
 
 	}
 	mesg.Content = fmt.Sprintf("%v has left our chat...", client.Name)
 	server.broadcastCh <- mesg
-
 }
 
 // AddClient adds a new client to the server's clients map. It locks the mutex to ensure thread safety while modifying the clients map.
