@@ -122,9 +122,11 @@ func (server *Server) AcceptConnections() error {
 func (server *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
 	sendWelcome(conn)
-	client := &Client{Name: GetName(conn), Conn: conn}
-	mesg := Message{Sender: client, System: true}
+	var client *Client
+	var mesg Message
 	for {
+		client = &Client{Name: GetName(conn), Conn: conn}
+		mesg = Message{Sender: client, System: true}
 		err := server.AddClient(client)
 		if err == nil {
 			for _, msg := range server.History {
@@ -137,7 +139,8 @@ func (server *Server) HandleConnection(conn net.Conn) {
 			break
 		} else {
 			fmt.Fprintf(conn, "%v\n", err)
-			client = &Client{Name: GetName(conn), Conn: conn}
+			fmt.Fprintf(conn, "[ENTER YOUR NAME]:")
+			continue
 		}
 	}
 	// Listen for client input and send message to the server's broadcast channel
